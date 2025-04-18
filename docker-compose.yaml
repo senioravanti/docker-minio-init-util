@@ -1,0 +1,100 @@
+name: vm
+
+volumes:
+  vm-s3-data:
+  vm-vault-data:
+
+networks:
+  vm-s3-net:
+  vm-vault-net:
+
+services:
+  vault:
+    image: 'hashicorp/vault:1.19'
+    container_name: 'vm-vault'
+
+    restart: unless-stopped
+
+    volumes:
+      - 'vm-vault-data:/vault/file'
+      - './vault/config:/vault/config'
+
+    cap_add:
+      - IPC_LOCK
+
+    healthcheck:
+      test: [ "CMD", "wget", "-nv", "--spider", "http://127.0.0.1:8200/v1/sys/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    command: 'server'
+
+    ports:
+      - '8200:8200' # api
+      - '8201:8201'
+
+    networks:
+      vm-vault-net:
+
+
+  init-vault:
+    image: 'stradiavanti/init-vault:0.1'
+    container_name: 'vm-init-vault'
+
+    restart: unless-stopped
+
+    depends_on:
+      vault:
+        condition: service_started
+
+    volumes:
+      - './vault/scripts:/docker-entrypoint-init.d'
+      - '${SECRET_DIR}:/usr/local/share/vault/secrets'
+
+    networks:
+      vm-vault-net:
+
+
+  minio:
+    image: 'stradiavanti/bitnami-minio-vault:0.1'
+
+    container_name: 'vm-minio'
+
+    depends_on:
+      vault:
+        condition: service_healthy
+
+    volumes:
+      - '${SECRET_DIR}/root-token.txt:/usr/local/share/vault/secrets/root-token.txt:ro'
+
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+
+    networks:
+      vm-vault-net:
+      vm-s3-net:
+
+
+  init-minio:
+    image: 'stradiavanti/init-minio:0.1'
+
+    container_name: 'vm-init-minio'
+
+    depends_on:
+      vault:
+        condition: service_healthy
+
+    volumes:
+      - '${SECRET_DIR}/root-token.txt:/usr/local/share/vault/secrets/root-token.txt:ro'
+      - './scripts:/docker-entrypoint-init.d'
+
+    environment:
+      MINIO_HOSTNAME: minio
+      MINIO_SERVER_PORT: 9000
+
+    networks:
+      vm-vault-net:
+      vm-s3-net:

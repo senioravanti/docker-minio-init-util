@@ -38,6 +38,3 @@ clear ; curl -sS -i \
     -H "Authorization: Bearer $ROOT_TOKEN" \
     http://localhost:8200/v1/cubbyhole/minio/keys/secret-key
 ```
-
-## Пример compose-файла
-
