@@ -4,7 +4,15 @@
 
 ```sh
 clear ; docker build \
+    -t 'stradiavanti/init-minio:0.1' .
+```
+
+ИЛИ
+
+```sh
+clear ; docker build \
     --no-cache \
+    --push \
     -t 'stradiavanti/init-minio:0.1' .
 ```
 

@@ -1,6 +1,8 @@
-set -u
+set -u -x
 
 ROOT_TOKEN=$(cat /usr/local/share/vault/secrets/root-token.txt)
+
+printf "fetch root password ...\n"
 export MINIO_ROOT_PASSWORD=$(curl -sS \
     -H "Authorization: Bearer $ROOT_TOKEN" \
     http://vault:8200/v1/cubbyhole/minio/root-password | jq -r .data.data.value)
@@ -12,8 +14,8 @@ curl -sS \
     | jq -r '.data.keys' \
     | grep -Fq 'keys'
 
+mc alias set local "http://$MINIO_HOSTNAME:$MINIO_SERVER_PORT" $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 if [ $? -ne 0 ]; then
-    mc alias set local "http://$MINIO_HOSTNAME:$MINIO_SERVER_PORT" $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 
     printf "generating client keys ...\n"
     mkdir -p /tmp/minio/client
@@ -45,4 +47,4 @@ if [ $? -ne 0 ]; then
 fi
 
 printf "execute cmd ..."
-exec /bin/sh "$@"
+source "$@"
