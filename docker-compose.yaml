@@ -89,7 +89,8 @@ services:
 
     volumes:
       - '${SECRET_DIR}/root-token.txt:/usr/local/share/vault/secrets/root-token.txt:ro'
-      - './scripts:/docker-entrypoint-init.d'
+      - '${SCRIPT_DIR}:/docker-entrypoint-init.d'
+      - '${ASSETS_DIR}:/usr/local/share/minio:ro'
 
     environment:
       MINIO_HOSTNAME: minio

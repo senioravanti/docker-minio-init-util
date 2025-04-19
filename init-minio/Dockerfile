@@ -1,8 +1,9 @@
 FROM alpine:3.21
 
 RUN mkdir /docker-entrypoint-init.d \
-    && mkdir -p /usr/local/share/vault/secrets
-VOLUME [ "/docker-entrypoint-init.d", "/usr/local/share/vault/secrets" ]
+    && mkdir -p /usr/local/share/vault/secrets \
+    && mkdir -p /usr/local/share/minio
+VOLUME [ "/docker-entrypoint-init.d", "/usr/local/share/vault/secrets", "/usr/local/share/minio" ]
 
 RUN apk add --no-cache --update \
     curl \
