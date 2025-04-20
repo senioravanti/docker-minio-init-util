@@ -6,6 +6,7 @@ printf "fetch root password ...\n"
 export MINIO_ROOT_PASSWORD=$(curl -sS \
     -H "Authorization: Bearer $ROOT_TOKEN" \
     http://vault:8200/v1/cubbyhole/minio/root-password | jq -r .data.data.value)
+mc alias set local "http://$MINIO_HOSTNAME:$MINIO_SERVER_PORT" $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 
 curl -sS \
     -X LIST \
@@ -14,7 +15,6 @@ curl -sS \
     | jq -r '.data.keys' \
     | grep -Fq 'keys'
 
-mc alias set local "http://$MINIO_HOSTNAME:$MINIO_SERVER_PORT" $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 if [ $? -ne 0 ]; then
 
     printf "generating client keys ...\n"
