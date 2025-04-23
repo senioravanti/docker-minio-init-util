@@ -1,5 +1,3 @@
-export MINIO_ROOT_USER=minioadmin
-
 curl -sS -i \
     -o /tmp/minio-root-password-response.txt \
     -H "Authorization: Bearer $(cat /usr/local/share/vault/secrets/root-token.txt)" \

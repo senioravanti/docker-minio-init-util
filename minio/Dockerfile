@@ -14,4 +14,6 @@ COPY ./scripts/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 USER 1001
 
+ENV MINIO_ROOT_USER=minioadmin
+
 CMD [ "/usr/local/bin/docker-entrypoint.sh" ]
